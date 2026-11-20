@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 14px;
+    color: #0f172a;
+    background: #ffffff;
+  }
+  h3 {
+    margin: 0 0 12px;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .table-wrap {
+    overflow-x: auto;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 980px;
+    font-size: 13.5px;
+  }
+  th {
+    background: #f1f5f9;
+    padding: 8px 10px;
+    border-bottom: 1px solid #cbd5e1;
+    font-weight: 700;
+    text-align: right;
+  }
+  th.th-left {
+    text-align: left;
+    border-bottom: 2px solid #cbd5e1;
+    vertical-align: bottom;
+  }
+  th.th-group {
+    text-align: center;
+    background: #e2e8f0;
+    color: #0f172a;
+    border-bottom: 1px solid #cbd5e1;
+  }
+  th.sub-col {
+    font-size: 12px;
+    color: #334155;
+    border-bottom: 2px solid #cbd5e1;
+  }
+  th.th-total {
+    text-align: right;
+    background: #eff6ff;
+    color: #1e3a8a;
+    border-bottom: 2px solid #93c5fd;
+    vertical-align: bottom;
+  }
+  .grp-start {
+    border-left: 2px solid #cbd5e1;
+  }
+  td {
+    padding: 8px 10px;
+    text-align: right;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  td.dia {
+    text-align: left;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  td.pas {
+    color: #334155;
+  }
+  td.gan-sub {
+    color: #0f766e;
+    font-weight: 600;
+  }
+  td.gan-total {
+    font-weight: 700;
+    color: #1e3a8a;
+    background: #f8fafc;
+  }
+  tr:hover td {
+    background: #f8fafc;
+  }
+  tr:hover td.gan-total {
+    background: #eff6ff;
+  }
+  .nota {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #64748b;
+  }
+</style>
+</head>
+<body>
+  <h3>Pasajeros y Ganancia Promedio por Día y Franja Horaria</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th rowspan='2' class='th-left'>Día</th><th colspan='2' class='th-group'>Peak</th><th colspan='2' class='th-group grp-start'>Transición</th><th colspan='2' class='th-group grp-start'>Valle</th><th rowspan='2' class='th-total grp-start'>Prom. Ganancia Día</th></tr>
+        <tr><th class='sub-col'>Pas. prom.</th><th class='sub-col'>Gan. prom.</th><th class='sub-col grp-start'>Pas. prom.</th><th class='sub-col'>Gan. prom.</th><th class='sub-col grp-start'>Pas. prom.</th><th class='sub-col'>Gan. prom.</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class='dia'>Martes</td><td class='pas'>45.29</td><td class='gan-sub'>$246,287</td><td class='pas grp-start'>33.18</td><td class='gan-sub'>$175,661</td><td class='pas grp-start'>34.39</td><td class='gan-sub'>$182,181</td><td class='gan-total grp-start'>$205,262</td></tr><tr><td class='dia'>Miércoles</td><td class='pas'>48.29</td><td class='gan-sub'>$264,441</td><td class='pas grp-start'>35.75</td><td class='gan-sub'>$192,355</td><td class='pas grp-start'>38.14</td><td class='gan-sub'>$203,639</td><td class='gan-total grp-start'>$223,830</td></tr><tr><td class='dia'>Jueves</td><td class='pas'>51.37</td><td class='gan-sub'>$287,133</td><td class='pas grp-start'>36.68</td><td class='gan-sub'>$198,411</td><td class='pas grp-start'>40.17</td><td class='gan-sub'>$211,958</td><td class='gan-total grp-start'>$237,057</td></tr><tr><td class='dia'>Lunes</td><td class='pas'>55.15</td><td class='gan-sub'>$310,412</td><td class='pas grp-start'>38.27</td><td class='gan-sub'>$208,752</td><td class='pas grp-start'>41.17</td><td class='gan-sub'>$213,597</td><td class='gan-total grp-start'>$250,121</td></tr><tr><td class='dia'>Sábado</td><td class='pas'>54.83</td><td class='gan-sub'>$309,633</td><td class='pas grp-start'>38.91</td><td class='gan-sub'>$212,889</td><td class='pas grp-start'>41.50</td><td class='gan-sub'>$217,708</td><td class='gan-total grp-start'>$252,315</td></tr><tr><td class='dia'>Viernes</td><td class='pas'>59.69</td><td class='gan-sub'>$337,893</td><td class='pas grp-start'>42.77</td><td class='gan-sub'>$238,002</td><td class='pas grp-start'>46.11</td><td class='gan-sub'>$243,792</td><td class='gan-total grp-start'>$278,932</td></tr><tr><td class='dia'>Domingo</td><td class='pas'>61.71</td><td class='gan-sub'>$354,383</td><td class='pas grp-start'>44.82</td><td class='gan-sub'>$251,298</td><td class='pas grp-start'>46.56</td><td class='gan-sub'>$244,736</td><td class='gan-total grp-start'>$290,118</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="nota">Filas ordenadas de menor a mayor según <strong>Prom. Ganancia Día</strong>. Cada franja muestra promedio de pasajeros (<strong>Pas. prom.</strong>) y ganancia promedio por viaje (<strong>Gan. prom.</strong>).</div>
+</body>
+</html>
