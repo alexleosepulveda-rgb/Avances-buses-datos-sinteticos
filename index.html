@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reporte Operativo — Optimización de Flota y Horarios</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #e2e8f0;
+      --accent: #1e3a8a;
+      --accent-soft: #eff6ff;
+      --ok-bg: #dcfce7;
+      --ok-fg: #166534;
+      --param-bg: #f1f5f9;
+      --param-fg: #334155;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 32px 20px 64px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+    header.page-header {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px 28px;
+      margin-bottom: 24px;
+    }
+    header.page-header h1 {
+      margin: 0 0 6px;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    header.page-header p {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    nav.toc {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    nav.toc a {
+      text-decoration: none;
+      font-size: 0.85rem;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 5px 11px;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+    nav.toc a:hover {
+      background: #dbeafe;
+    }
+    section.card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 26px;
+      overflow: hidden;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      background: #fcfcfd;
+    }
+    .badge {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 3px 8px;
+      border-radius: 5px;
+    }
+    .card-header h2 {
+      margin: 0;
+      font-size: 1.08rem;
+      font-weight: 600;
+      flex: 1;
+    }
+    .file-tag {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .checklist-body {
+      padding: 18px 22px 22px;
+    }
+    .checklist-intro {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 0.93rem;
+    }
+    table.proc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    table.proc-table th {
+      text-align: left;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 10px;
+    }
+    table.proc-table td {
+      padding: 10px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: top;
+    }
+    table.proc-table tr:last-child td {
+      border-bottom: none;
+    }
+    .col-num {
+      width: 46px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .col-item {
+      width: 220px;
+    }
+    .col-est {
+      width: 170px;
+      text-align: right;
+    }
+    .pill {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .tag-ok {
+      background: var(--ok-bg);
+      color: var(--ok-fg);
+    }
+    .tag-param {
+      background: var(--param-bg);
+      color: var(--param-fg);
+    }
+    .frame-wrap {
+      padding: 12px 16px 0;
+    }
+    iframe {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+    .notes {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      padding: 18px 22px 22px;
+    }
+    .note-col h3 {
+      margin: 0 0 6px;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+    .note-col p {
+      margin: 0;
+      font-size: 0.92rem;
+      color: var(--text);
+    }
+    .note-col.findings {
+      background: #f8fafc;
+      border-left: 3px solid var(--accent);
+      padding: 10px 14px;
+      border-radius: 0 6px 6px 0;
+    }
+    @media (max-width: 860px) {
+      .notes {
+        grid-template-columns: 1fr;
+      }
+      .file-tag {
+        display: none;
+      }
+      table.proc-table, table.proc-table thead, table.proc-table tbody, table.proc-table tr, table.proc-table td {
+        display: block;
+        width: 100%;
+      }
+      table.proc-table thead {
+        display: none;
+      }
+      .col-est {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="page-header">
+      <h1>Reporte Operativo y Financiero de Flota de Buses</h1>
+      <p>Procedimientos y validaciones previas del modelo/datos seguidos de las tablas y visualizaciones interactivas.</p>
+      <nav class="toc">
+        <a href="#s0">00. Procedimientos y Validaciones</a>
+        <a href="#s1">01. Medias por Franja</a>
+        <a href="#s2">02. Medias por Categoría</a>
+        <a href="#s3">03. Demanda por Recorrido</a>
+        <a href="#s4">04. Demanda vs. Capacidad</a>
+        <a href="#s5">05. Multas por Reemplazo</a>
+        <a href="#s6">06. Margen de Ganancia</a>
+      </nav>
+    </header>
+
+    <section class="card" id="s0">
+      <div class="card-header">
+        <span class="badge">00</span>
+        <h2>Procedimientos, Reglas y Verificaciones Previas al Graficado</h2>
+        <span class="file-tag">Apuntes de auditoría</span>
+      </div>
+      <div class="checklist-body">
+        <p class="checklist-intro">
+          Bitácora de validaciones operativas, parámetros del modelo de optimización (MILP con Google OR-Tools)
+          y reglas de cálculo revisadas antes de generar las visualizaciones.
+        </p>
+        <table class="proc-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Procedimiento / Regla</th>
+              <th>Detalle verificado o parametrizado</th>
+              <th style="text-align:right;">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+        <tr>
+          <td class="col-num">01</td>
+          <td class="col-item"><strong>Retorno a ciudad de origen</strong></td>
+          <td class="col-desc">Verificado que el último viaje de cada recorrido/asignación corresponda a su ciudad de origen.</td>
+          <td class="col-est"><span class="pill tag-ok">Verificado</span></td>
+        </tr>
+        
+        <tr>
+          <td class="col-num">02</td>
+          <td class="col-item"><strong>Restricción de tramo San Felipe – Los Andes</strong></td>
+          <td class="col-desc">Verificado que no existan viajes directos entre San Felipe y Los Andes según la regla del modelo.</td>
+          <td class="col-est"><span class="pill tag-ok">Verificado</span></td>
+        </tr>
+        
+        <tr>
+          <td class="col-num">03</td>
+          <td class="col-item"><strong>Sin solapamiento de recursos</strong></td>
+          <td class="col-desc">Verificado que no existan más de 1 viaje simultáneo con el mismo chofer ni con el mismo bus.</td>
+          <td class="col-est"><span class="pill tag-ok">Verificado</span></td>
+        </tr>
+        
+        <tr>
+          <td class="col-num">04</td>
+          <td class="col-item"><strong>Frecuencia y volumen de viajes</strong></td>
+          <td class="col-desc">Base de 132 viajes programados con frecuencia cada 30 minutos.</td>
+          <td class="col-est"><span class="pill tag-param">Parámetro del modelo</span></td>
+        </tr>
+        
+        <tr>
+          <td class="col-num">05</td>
+          <td class="col-item"><strong>Límite de turnos</strong></td>
+          <td class="col-desc">Máximo de 4 turnos configurados en la planificación.</td>
+          <td class="col-est"><span class="pill tag-param">Parámetro del modelo</span></td>
+        </tr>
+        
+        <tr>
+          <td class="col-num">06</td>
+          <td class="col-item"><strong>Flota disponible</strong></td>
+          <td class="col-desc">Total de 75 buses disponibles en la operación.</td>
+          <td class="col-est"><span class="pill tag-param">Parámetro del modelo</span></td>
+        </tr>
+        
+        <tr>
+          <td class="col-num">07</td>
+          <td class="col-item"><strong>Dotación de conductores</strong></td>
+          <td class="col-desc">Total de 60 choferes asignados.</td>
+          <td class="col-est"><span class="pill tag-param">Parámetro del modelo</span></td>
+        </tr>
+        
+        <tr>
+          <td class="col-num">08</td>
+          <td class="col-item"><strong>Capacidad y combustible por categoría</strong></td>
+          <td class="col-desc">Capacidades de 74 pasajeros (Alta), 56 pasajeros (Media) y 48 pasajeros (Baja); combustible con +15% en mayor capacidad y -15% en menor capacidad.</td>
+          <td class="col-est"><span class="pill tag-param">Parámetro del modelo</span></td>
+        </tr>
+        
+        <tr>
+          <td class="col-num">09</td>
+          <td class="col-item"><strong>Multas por reemplazo de categoría</strong></td>
+          <td class="col-desc">Penalización cuando se usa una categoría distinta a la correspondiente al horario: Media en vez de Alta ($35.000) y Baja en vez de Alta ($70.000).</td>
+          <td class="col-est"><span class="pill tag-param">Regla de penalización</span></td>
+        </tr>
+        
+        <tr>
+          <td class="col-num">10</td>
+          <td class="col-item"><strong>Tiempo de holgura mínimo</strong></td>
+          <td class="col-desc">Verificado el cumplimiento de al menos 30 minutos de holgura entre servicios.</td>
+          <td class="col-est"><span class="pill tag-ok">Verificado</span></td>
+        </tr>
+        
+        <tr>
+          <td class="col-num">11</td>
+          <td class="col-item"><strong>Repartición territorial de choferes</strong></td>
+          <td class="col-desc">Distribución de los 60 choferes: 30 en Santiago, 15 en Los Andes y 15 en San Felipe.</td>
+          <td class="col-est"><span class="pill tag-param">Parámetro del modelo</span></td>
+        </tr>
+        
+        <tr>
+          <td class="col-num">12</td>
+          <td class="col-item"><strong>Duración de viaje y costo fijo</strong></td>
+          <td class="col-desc">Cada viaje tiene una duración de 150 minutos y se considera un costo fijo por bus de $120.000 aprox.</td>
+          <td class="col-est"><span class="pill tag-param">Parámetro del modelo</span></td>
+        </tr>
+        
+        <tr>
+          <td class="col-num">13</td>
+          <td class="col-item"><strong>Normalización horaria</strong></td>
+          <td class="col-desc">Hora de salida convertida en minutos desde medianoche para cálculos y ordenamiento.</td>
+          <td class="col-est"><span class="pill tag-param">Transformación de datos</span></td>
+        </tr>
+        
+        <tr>
+          <td class="col-num">14</td>
+          <td class="col-item"><strong>Estimación de pasajeros y factores diarios</strong></td>
+          <td class="col-desc">Pasajeros estimados calculados con variación aleatoria uniforme de ocupación real entre 65% y 85% multiplicada por factor día: Lunes 1,00; Martes 0,85; Miércoles 0,90; Jueves 0,95; Viernes 1,10; Sábado 1,00; Domingo 1,15 (con tope hacia capacidad de asientos, no pudiendo superarse).</td>
+          <td class="col-est"><span class="pill tag-param">Lógica de demanda</span></td>
+        </tr>
+        
+        <tr>
+          <td class="col-num">15</td>
+          <td class="col-item"><strong>Cobertura total de viajes</strong></td>
+          <td class="col-desc">Verificado que todos los viajes programados fueron cubiertos.</td>
+          <td class="col-est"><span class="pill tag-ok">Verificado</span></td>
+        </tr>
+        
+        <tr>
+          <td class="col-num">16</td>
+          <td class="col-item"><strong>Clasificación de franjas horarias</strong></td>
+          <td class="col-desc">Definición de franjas: Peak (mañana y tarde), Transición (media mañana y media tarde) y Valle (mediodía).</td>
+          <td class="col-est"><span class="pill tag-param">Regla de clasificación</span></td>
+        </tr>
+        
+        <tr>
+          <td class="col-num">17</td>
+          <td class="col-item"><strong>Optimización MILP y convergencia</strong></td>
+          <td class="col-desc">Modelo resuelto mediante Programación Lineal Entera Mixta (MILP) con Google OR-Tools, alcanzando un Gap de 0,00%.</td>
+          <td class="col-est"><span class="pill tag-ok">Verificado / Resuelto</span></td>
+        </tr>
+        
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    
+    <section class="card">
+      <div class="card-header">
+        <span class="badge">01</span>
+        <h2>Promedio de Pasajeros por Franja Horaria y Día</h2>
+        <span class="file-tag">1_tabla_medias_franja.html</span>
+      </div>
+      <div class="frame-wrap">
+        <iframe src="1_tabla_medias_franja.html" style="height: 340px;" loading="lazy"></iframe>
+      </div>
+      <div class="notes">
+        <div class="note-col">
+          <h3>Qué muestra</h3>
+          <p>Tabla resumen con el promedio diario de pasajeros estimados según franja horaria (<em>Peak</em>, <em>Transición</em> y <em>Valle</em>) a lo largo de la semana.</p>
+        </div>
+        <div class="note-col">
+          <h3>Importancia para el proyecto</h3>
+          <p>Permite contrastar en que días se reciben más pasajeros y ganancias .</p>
+        </div>
+        <div class="note-col findings">
+          <h3>Hallazgos</h3>
+          <p>El domingo y el viernes fueron los días con más ganancias y pasajeros</p>
+        </div>
+      </div>
+    </section>
+    
+    <section class="card">
+      <div class="card-header">
+        <span class="badge">02</span>
+        <h2>Demanda de Pasajeros por Recorrido</h2>
+        <span class="file-tag">3_demanda_pasajeros_recorridos.html</span>
+      </div>
+      <div class="frame-wrap">
+        <iframe src="3_demanda_pasajeros_recorridos.html" style="height: 540px;" loading="lazy"></iframe>
+      </div>
+      <div class="notes">
+        <div class="note-col">
+          <h3>Qué muestra</h3>
+          <p>Visualización interactiva de la demanda de pasajeros estimados por recorrido Se suman todos los Pasajeros Estimados de los viajes realizados en ese día y en ese recorrido específico.</p>
+        </div>
+        <div class="note-col">
+          <h3>Importancia para el proyecto</h3>
+          <p>Identifica si hay mayor menor cantidad de pasajeros en la Ida o a vuelta en la ciudad  y en que día hay mayor demanda </p>
+        </div>
+        <div class="note-col findings">
+          <h3>Hallazgos</h3>
+          <p>Hay poca diferencia entre la ida y la vuelta, sin embargo en los datos reales podria haber otro comportamiento, el día con menor demanda es el Martes</p>
+        </div>
+      </div>
+    </section>
+    
+    <section class="card">
+      <div class="card-header">
+        <span class="badge">03</span>
+        <h2>Auditoría de Demanda vs. Capacidad</h2>
+        <span class="file-tag">4_auditoria_demanda_vs_capacidad_definitiva.html</span>
+      </div>
+      <div class="frame-wrap">
+        <iframe src="4_auditoria_demanda_vs_capacidad_definitiva.html" style="height: 560px;" loading="lazy"></iframe>
+      </div>
+      <div class="notes">
+        <div class="note-col">
+          <h3>Qué muestra</h3>
+          <p>Gráfico de auditoría que contrasta la demanda estimada de pasajeros frente a la capacidad de asientos disponible en la operación.</p>
+        </div>
+        <div class="note-col">
+          <h3>Importancia para el proyecto</h3>
+          <p>Es clave para detectar cuellos de botella (sobreocupación o déficit de asientos) y espacios ociosos (capacidad subutilizada), validando la coherencia del plan de buses.</p>
+        </div>
+        <div class="note-col findings">
+          <h3>Hallazgos</h3>
+          <p>El día Viernes y Domingo  es en donde se completaron más los asientos, acercandose a su limite </p>
+        </div>
+      </div>
+    </section>
+    
+    <section class="card">
+      <div class="card-header">
+        <span class="badge">04</span>
+        <h2>Multas por Reemplazo de Categoría por Día</h2>
+        <span class="file-tag">5_multas_reemplazo_categorias.html</span>
+      </div>
+      <div class="frame-wrap">
+        <iframe src="5_multas_reemplazo_categorias.html" style="height: 500px;" loading="lazy"></iframe>
+      </div>
+      <div class="notes">
+        <div class="note-col">
+          <h3>Qué muestra</h3>
+          <p>Gráfico de barras agrupadas que muestra la cantidad de eventos por reemplazo de categoría (ideal vs. asignada) a lo largo de la semana, con detalle de franja, horarios y monto de multa al pasar el cursor.</p>
+        </div>
+        <div class="note-col">
+          <h3>Importancia para el proyecto</h3>
+          <p>Cuantifica las penalizaciones operativas por desajuste de flota, ayudando a priorizar dónde ajustar la mezcla de buses para reducir multas sin perder cobertura.</p>
+        </div>
+        <div class="note-col findings">
+          <h3>Hallazgos</h3>
+          <p>El dia Viernes y Domingo, fue donde más hubo cambios de Alta a Media </p>
+        </div>
+      </div>
+    </section>
+    
+    <section class="card">
+      <div class="card-header">
+        <span class="badge">05</span>
+        <h2>Evolución Semanal del Margen de Ganancia</h2>
+        <span class="file-tag">6_margen_ganancia_semanal.html</span>
+      </div>
+      <div class="frame-wrap">
+        <iframe src="6_margen_ganancia_semanal.html" style="height: 600px;" loading="lazy"></iframe>
+      </div>
+      <div class="notes">
+        <div class="note-col">
+          <h3>Qué muestra</h3>
+          <p>Serie temporal interactiva del margen neto estimado (ingresos por tarifa y pasajeros menos pago a choferes, combustible, peajes y multas por desajuste) por franja y día.</p>
+        </div>
+        <div class="note-col">
+          <h3>Importancia para el proyecto</h3>
+          <p>Integra ingresos y costos operativos en una sola lectura para distinguir franjas y días rentables de aquellos donde los costos o multas comprimen el margen.</p>
+        </div>
+        <div class="note-col findings">
+          <h3>Hallazgos</h3>
+          <p>La serie muestra una curva bimodal con peaks en la mañana (06:30–09:00) y vespertinos (18:00–20:30), separadas por un valle  al mediodía (11:00–15:30). Domingo y Viernes alcanzan los mayores márgenes (sobre $1,4M–$1,5M en sus peaks), mientras que Martes registra los niveles más bajos de toda la semana (cercanos a $0,6M en el valle). El bloque de mediodía representa el mayor riesgo de compresión de margen, por lo que conviene vigilar ahí la asignación de flota y costos operativos. </p>
+        </div>
+      </div>
+    </section>
+    
+  </div>
+  <script>
+    document.querySelectorAll("section.card[id^='s']:not(#s0)").forEach((sec, idx) => {
+      sec.id = "s" + (idx + 1);
+    });
+  </script>
+</body>
+</html>
